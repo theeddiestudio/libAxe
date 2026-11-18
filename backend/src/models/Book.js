@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import User from './User.js';
 
 const bookSchema = new mongoose.Schema({
     title: {
@@ -25,10 +24,25 @@ const bookSchema = new mongoose.Schema({
     },
     stock: {
         type: Number,
-        default: 1
+        default: 1,
+        min: 0,
+        validate: {
+            validator: Number.isInteger,
+            message: 'stock must be a whole number'
+        }
     },
     coverImage: {
         type: String
+    },
+    pricePerDay: {
+        type: Number,
+        default: 1,
+        min: 0
+    },
+    overduePerDay: {
+        type: Number,
+        default: 1.5,
+        min: 0
     },
     reservedBy: [{
         type: mongoose.Schema.Types.ObjectId,

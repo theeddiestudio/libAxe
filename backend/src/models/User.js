@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import Book from './Book.js';
 
 const userSchema = new mongoose.Schema({
     username: {

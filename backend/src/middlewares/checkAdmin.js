@@ -2,6 +2,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const checkUser = (req, res, next) => {
+    if (req.user && req.user.role === 'user') {
+        next();
+    } else {
+        return res.status(403).json({ message: "Not Allowed. Users only."});
+    }
+}
+
 const checkAdmin = (req,res,next) => {
     if(req.user && req.user.role === 'admin') {
         next();
@@ -36,4 +44,4 @@ const checkAdminPW = (req,res,next) => {
     }
 }
 
-export {checkAdmin, checkAdminPW};
+export {checkUser, checkAdmin, checkAdminPW};

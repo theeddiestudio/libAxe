@@ -1,4 +1,4 @@
-import rateLimit from "../config/limit.js";
+import rateLimit from "../config/rateLimit.js";
 
 const rateLimiter = async (req,res,next) => {
     try {
@@ -10,7 +10,7 @@ const rateLimiter = async (req,res,next) => {
         next();
         } catch (error) {
             console.log("Rate Limiting Error" , error);
-            next(error);
+            next();
         }
 }
 

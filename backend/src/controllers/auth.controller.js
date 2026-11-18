@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
+import { closeUserStreams } from '../lib/sse.js';
 
 const checkLogin = (req,res) => {
     try {
@@ -46,11 +47,13 @@ const loginUser = async (req,res) => {
 
 const logoutUser = async (req, res) => {
     try {
+        const userId = req.session.userId;
         req.session.destroy((error) => {
             if(error) {
                 console.log("Error while logout", error);
                 return res.status(500).json({message: "Could not logout"});
             }
+            closeUserStreams(userId);
             res.clearCookie('connect.sid');
             return res.status(200).json({message: "User logged out successfully"});
         })
@@ -89,6 +92,7 @@ const registerUser = async (req,res) => {
         req.session.userId = newUser._id;
         return res.status(201).json({message: "User Registered"});
     } catch (error) {
+        if (error.code === 11000) return res.status(400).json({ message: 'User already exists.' });
         res.status(500).json({message: 'Error during registration.'});
     }
 }
