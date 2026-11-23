@@ -11,17 +11,20 @@ export const AuthProvider = ({ children }) => {
         try {
             const res = await loginApi.get("/");
             if (res.data.isLogged) {
-                const user = await userApi.get("/");
-                setUser(user.data);
+                const profile = await userApi.get("/");
+                setUser(profile.data);
                 setIsLogged(true);
+                return profile.data;
             } else {
                 setUser(null);
                 setIsLogged(false);
+                return null;
             }
         } catch (error) {
             console.log("Error while checking login", error);
             setUser(null);
             setIsLogged(false);
+            return null;
         }
     }, []);
 
@@ -34,10 +37,12 @@ export const AuthProvider = ({ children }) => {
         refreshAuth();
     }, [refreshAuth]);
 
+    const isAdmin = user?.role === 'admin';
+
     return (
         <AuthContext.Provider value={
             {
-                isLogged, user, refreshAuth, clearAuth
+                isLogged, user, isAdmin, refreshAuth, clearAuth
             }
         } >
           {children}  

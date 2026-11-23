@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useNavigate } from 'react-router'
 import { ArrowLeftIcon, CircleCheckIcon } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useBooks } from '../context/BooksContext'
 import Navbar from '../components/Navbar'
 import Loader from '../components/Loader'
 import BookCover from '../components/BookCover'
-import BorrowBtn from '../components/BorrowBtn'
+import BookActions from '../components/BookActions.jsx'
 import BooksNotFound from '../components/BooksNotFound'
 import RateLimited from '../components/RateLimited'
+import { useRequests } from '../context/RequestsContext.jsx'
 
 const Show = () => {
   const { id } = useParams();
   const { isLogged, user } = useAuth();
   const {books, loading, isRateLimited, refreshBooks} = useBooks();
+  const {pendingBorrow} = useRequests();
+
+  const navigate = useNavigate();
 
   const book = books.find((b) => b._id === id);
 
@@ -63,6 +67,7 @@ const Show = () => {
 
   const outOfStock = book.stock <= 0;
   const isBorrowed = Boolean(user && book.reservedBy?.includes(user._id));
+  const pending = pendingBorrow.get(book._id);
 
   return (
     <div className="min-h-screen bg-base-200">
@@ -100,6 +105,7 @@ const Show = () => {
                   ? "Out of stock"
                   : `Available • ${book.stock} ${book.stock === 1 ? "copy" : "copies"}`}
               </span>
+              {pending && <span className='badge badge-warning'>Request pending</span>}
             </div>
 
             <p className="whitespace-pre-line wrap-break-word leading-relaxed opacity-80">
@@ -114,7 +120,7 @@ const Show = () => {
                   <Link to="/profile" className="btn btn-sm">Go to Profile</Link>
                 </div>
               ) : (
-                <BorrowBtn book={book} className="btn btn-primary w-full sm:w-auto" />
+                <BookActions book={book} className="w-full sm:w-auto" onDeleted={() => navigate("/")} />
               )}
             </div>
           </div>

@@ -1,6 +1,7 @@
 import Home from "./pages/Home.jsx"
 import Login from "./pages/Login.jsx"
 import Profile from "./pages/Profile.jsx"
+import Admin from "./pages/Admin.jsx"
 import Show from "./pages/Show.jsx"
 import NotFound from "./pages/NotFound.jsx"
 import GuestRoutes from "./protectedRoutes/GuestRoutes.jsx"
@@ -18,8 +19,13 @@ const App = () => {
           </GuestRoutes>
         } />
         <Route path="/profile" element={
-          <UnauthorizedRoutes>
+          <UnauthorizedRoutes role='user'>
             <Profile />
+          </UnauthorizedRoutes>
+        } />
+        <Route path="/admin" element={
+          <UnauthorizedRoutes role='admin'>
+            <Admin />
           </UnauthorizedRoutes>
         } />
         <Route path="/books/:id" element={<Show />} />

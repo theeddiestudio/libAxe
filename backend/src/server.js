@@ -14,6 +14,8 @@ import rateLimiter from './middlewares/rateLimiter.js';
 
 dotenv.config();
 
+// User.reservedBooks is now only ever written, never read. The Loan record is the truth, and Book.reservedBy is what the frontend uses. A list that’s maintained but never read tends to rot. Removing it later means deleting it from the User model, from approveBorrow, approveReturn and deleteBook, and the matching User.updateOne / updateMany calls. I’d do it only once everything else works, since it’s cleanup and not a fix.
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

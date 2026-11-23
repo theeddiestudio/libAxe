@@ -118,8 +118,22 @@ export const BooksProvider = ({children}) => {
         }));
     }, []);
 
+    const upsertBook = useCallback((book) => {
+        mutations.current += 1;
+        setBooks((prev) => (
+            prev.some((b) => b._id === book._id)
+                ? prev.map((b) => (b._id === book._id ? book : b))
+                : [book, ...prev]
+        ));
+    }, []);
+
+    const removeBook = useCallback((bookId) => {
+        mutations.current += 1;
+        setBooks((prev) => prev.filter((b) => b._id !== bookId));
+    }, []);
+
     return (
-        <BooksContext.Provider value={{books, loading, isRateLimited, refreshBooks, markBorrowed, markReturned}} >
+        <BooksContext.Provider value={{books, loading, isRateLimited, refreshBooks, markBorrowed, markReturned, upsertBook, removeBook}} >
             {children}
         </BooksContext.Provider>
     );

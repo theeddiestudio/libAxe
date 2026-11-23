@@ -1,12 +1,13 @@
 import { Navigate } from "react-router";
-import { useAuth } from "../context/AuthContext";
 import Loader from "../components/Loader"
+import { useAuth } from "../context/AuthContext.jsx";
+import { homeFor } from "../lib/utils.js";
 
 const GuestRoutes = ({ children }) => {
-    const { isLogged } = useAuth();
+    const { isLogged, user } = useAuth();
 
     if (isLogged === null) return <Loader full />
-    return isLogged ? <Navigate to={"/profile"} replace /> : children;
+    return isLogged ? <Navigate to={homeFor(user)} replace /> : children;
 }
 
 export default GuestRoutes;

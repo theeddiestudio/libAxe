@@ -1,53 +1,71 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
-import { Undo2Icon } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { userApi } from '../lib/axios'
-import { useAuth } from '../context/AuthContext'
-import { useBooks } from '../context/BooksContext'
-import { getErrorMessage } from '../lib/utils'
+import { Undo2Icon, XIcon } from 'lucide-react'
+import { requestsApi } from '../lib/axios'
+import { useRequests } from '../context/RequestsContext'
+import { useLoans } from '../context/LoansContext'
+import { useApiError } from '../hooks/useApiError'
 
-const ReturnBtn = ({ book, className = "btn btn-outline btn-sm"}) => {
-    const [loading, setLoading] = useState(false);
-    const {user, clearAuth} = useAuth();
-    const {markReturned, refreshBooks} = useBooks();
-    const navigate = useNavigate();
+const ReturnBtn = ({ loan, className = "btn btn-outline btn-sm" }) => {
+    const { pendingReturn, addRequest, removeRequest, refreshRequests } = useRequests();
+    const { refreshLoans } = useLoans();
+    const handleApiError = useApiError();
 
-    const handleReturn = async () => {
-        if(loading) return;
-        if (!window.confirm(`Return "${book.title}"?`)) return;
+    const [busy, setBusy] = useState(false);
 
-        setLoading(true);
+    const bookId = loan.book?._id;
+    const title = loan.book?.title ?? "this book";
+    const pending = bookId ? pendingReturn.get(bookId) : undefined;
+
+    const sendReturn = async () => {
+        if (busy || !bookId) return;
+        if (!window.confirm(`Request to return "${title}"?`)) return;
+
+        setBusy(true);
         try {
-            await userApi.delete(`/${book._id}`);
-            toast.success("Book returned successfully");
-            markReturned(book._id, user._id)
+            const res = await requestsApi.post("/", { bookId, type: "return" });
+            addRequest(res.data);
+            toast.success("Return requested.");
         } catch (error) {
-            console.log("Error returning book:", error);
-            const status = error.response?.status;
+            const status = handleApiError(error, "Could not send return request");
 
-            if (status === 429) {
-                toast.error("Too many requests", { duration: 4000, icon: "💀" });
-            } else if (status === 401) {
-                clearAuth();
-                toast.error("Session expired, please login again");
-                navigate("/login");
-            } else if (!error.response) {
-                toast.error("Cannot reach the server");
-            } else {
-                toast.error(getErrorMessage(error, "Could not return book"));
-                if (status === 400 || status === 404) refreshBooks(true);
+            if (status === 400 || status === 409) {
+                refreshRequests();
+                refreshLoans();
             }
         } finally {
-            setLoading(false);
+            setBusy(false);
         }
-    }
+    };
+
+    const cancelReturn = async () => {
+        if (busy) return;
+        if (!window.confirm(`Cancel your return request for "${title}"?`)) return;
+
+        setBusy(true);
+        try {
+            await requestsApi.delete(`/${pending._id}`);
+            removeRequest(pending._id);
+            toast.success("Return request cancelled");
+        } catch (error) {
+            const status = handleApiError(error, "Could not cancel return request");
+            if (status === 404) refreshRequests();
+        } finally {
+            setBusy(false);
+        }
+    };
 
     return (
-        <button className={className} onClick={handleReturn} disabled={loading} title='Return book' aria-label='Return Book'>
-            {loading
+        <button
+            className={className}
+            onClick={pending ? cancelReturn : sendReturn}
+            disabled={busy || !bookId}
+            title={pending ? "Cancel return request" : "Request return"}
+            aria-label={pending ? "Cancel return request" : `Request return of ${title}`}
+        >
+            {busy
                 ? <span className='loading loading-spinner loading-xs'></span>
-                : <Undo2Icon className='size-4' />
+                : pending ? <XIcon className='size-4' /> : <Undo2Icon className='size-4' />
             }
         </button>
     )

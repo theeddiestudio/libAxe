@@ -1,15 +1,16 @@
 import { Link } from "react-router";
-import { BookOpenIcon, MenuIcon, UserIcon } from "lucide-react";
+import { BookOpenIcon, MenuIcon, ShieldCheckIcon, UserIcon } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import NavLinks from "./NavLinks.jsx";
 import ToggleTheme from "./ToggleTheme.jsx";
 import LoginBtn from "./LoginBtn.jsx";
+import NotificationBell from "./NotificationBell.jsx";
 
 const Navbar = () => {
-  const {isLogged, user} = useAuth();
+  const {isLogged, user, isAdmin} = useAuth();
 
   return (
-    <div className="bg-base-100 borber-b border-base-content/10 sticky top-0 z-30">
+    <div className="bg-base-100 border-b border-base-content/10 sticky top-0 z-30">
       <div className="navbar mx-auto max-w-6xl px-4">
 
         {/* Left side */}
@@ -29,12 +30,21 @@ const Navbar = () => {
 
         {/* Right side */}
         <div className="navbar-end gap-2">
+          {isLogged && <NotificationBell />}
           <ToggleTheme />
           {isLogged && user && (
-            <Link to='/profile' className="hidden md:flex items-center gap-w text-sm">
-              <UserIcon className="size-4" />
-              <span className="max-w-28 truncate">{user.username}</span>
-            </Link>
+            isAdmin ? (
+              <span className="hidden md:flex items-center gap-2 text-sm">
+                <ShieldCheckIcon className="size-4" />
+                <span className="max-w-28 truncate">{user.username}</span>
+                <span className="badge badge-primary badge-sm">Admin</span>
+              </span>
+            ) : (
+              <Link to='/profile' className="hidden md:flex items-center gap-2 text-sm">
+                <UserIcon className="size-4" />
+                <span className="max-w-28 truncate">{user.username}</span>
+              </Link>
+            )
           )}
           <div className="hidden md:block">
             {isLogged ? <LoginBtn type="out" /> : <LoginBtn />}

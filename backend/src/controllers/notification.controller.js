@@ -35,12 +35,12 @@ const getNotifications = async (req, res) => {
         const filter = {user: req.user._id};
 
         const {after} = req.query;
-        if(!typeof after === 'string' && !Number.isNaN(Date.parse(after))) {
+        if(typeof after === 'string' && !Number.isNaN(Date.parse(after))) {
             filter.createdAt = {$gt: new Date(after)};
         }
 
         const [notifications, unreadCount] = await Promise.all([
-            (await Notification.find(filter)).toSorted({createdAt: -1}).limit(MAX_LIST),
+            Notification.find(filter).sort({createdAt: -1}).limit(MAX_LIST),
             Notification.countDocuments({user: req.user._id, read:false})
         ]);
 

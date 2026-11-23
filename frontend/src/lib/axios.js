@@ -17,4 +17,21 @@ const booksApi = axios.create({
     withCredentials: true
 })
 
-export {loginApi, userApi, booksApi};
+const loansApi = axios.create({
+    baseURL: `${BASE_URL}loans`,
+    withCredentials: true
+})
+
+const requestsApi = axios.create({
+    baseURL: `${BASE_URL}requests`,
+    withCredentials: true
+})
+
+const notificationsApi = axios.create({
+    baseURL: `${BASE_URL}notifications`,
+    withCredentials: true
+})
+
+const STREAM_URL = `${BASE_URL}notifications/stream`
+
+export {loginApi, userApi, booksApi, loansApi, requestsApi, notificationsApi, STREAM_URL};

@@ -2,7 +2,7 @@ import { NavLink } from "react-router";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const NavLinks = () => {
-    const { isLogged } = useAuth();
+    const { isLogged, isAdmin } = useAuth();
     const active = ({ isActive }) => (
         isActive ? "menu-active" : ""
     );
@@ -14,10 +14,17 @@ const NavLinks = () => {
                     Catalog
                 </NavLink>
             </li>
-            { isLogged && 
+            { isLogged && !isAdmin && 
                 <li>
                     <NavLink to="/profile" className={active}>
                         My Profile
+                    </NavLink>
+                </li>
+            }
+            { isLogged && isAdmin &&
+                <li>
+                    <NavLink to="/admin" className={active}>
+                        Admin
                     </NavLink>
                 </li>
             }

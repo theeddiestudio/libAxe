@@ -1,10 +1,13 @@
 import {Link} from 'react-router'
 import { InfoIcon } from 'lucide-react'
 import BookCover from './BookCover'
-import BorrowBtn from './BorrowBtn'
+import BookActions from './BookActions.jsx'
+import { useRequests } from '../context/RequestsContext.jsx'
 
 const BookCard = ({ book }) => {
+    const {pendingBorrow} = useRequests();
     const outOfStock = book.stock <=0;
+    const pending = pendingBorrow.get(book._id);
 
     return (
         <div className='card bg-base-100 h-full shadow-sm'>
@@ -12,6 +15,9 @@ const BookCard = ({ book }) => {
                 <Link to={`/books/${book._id}`} className='h-full w-full'>
                     <BookCover src={book.coverImage} title={book.title} />
                 </Link>
+                {pending && (
+                    <span className='badge badge-warning badge-sm absolute left-3 top-3'>Request Pending</span>
+                )}
                 <span className={`badge badge-sm absolute right-3 top-3 ${outOfStock ? "badge-error" : book.stock <= 2 ? "badge-error" : "badge-success"}`}>
                     { outOfStock
                         ? "Out of stock"
@@ -36,7 +42,7 @@ const BookCard = ({ book }) => {
                 <p className="min-h-10 wrap-break-word text-sm opacity-60 line-clamp-2">{book.description}</p>
 
                 <div className="card-actions mt-auto flex-nowrap pt-2">
-                    <BorrowBtn book={book} />
+                    <BookActions book={book} className={"flex-1"} />
                     <Link to={`/books/${book._id}`} className='btn btn-outline btn-square' aria-label='View details'>
                         <InfoIcon className='size-4' />
                     </Link>

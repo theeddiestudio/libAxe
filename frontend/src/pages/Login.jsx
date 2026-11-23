@@ -4,7 +4,7 @@ import { ArrowLeftIcon, BookOpenIcon, LockIcon, MailIcon, ShieldCheckIcon, UserI
 import toast from 'react-hot-toast';
 import {loginApi} from '../lib/axios'
 import {useAuth} from '../context/AuthContext';
-import { getErrorMessage, validatePassword, validateUsername, PASSWORD_HINT, USERNAME_HINT } from "../lib/utils";
+import { getErrorMessage, validatePassword, validateUsername, PASSWORD_HINT, USERNAME_HINT, homeFor } from "../lib/utils";
 import ToggleTheme from "../components/ToggleTheme"
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -79,8 +79,8 @@ const Login = () => {
                 })
                 toast.success("Login Successful")
             }
-            await refreshAuth();
-            navigate("/profile", {replace: true});
+            const loggedUser = await refreshAuth();
+            navigate(homeFor(loggedUser), {replace: true});
         } catch (error) {
             console.log(isNew ? "Error on register:" : "Error on login", error);
 
