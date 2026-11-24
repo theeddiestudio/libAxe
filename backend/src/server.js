@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import path from 'path';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import { connectDatabase } from './config/database.js';
@@ -13,16 +14,17 @@ import notifRoutes from './routes/notification.routes.js'
 import rateLimiter from './middlewares/rateLimiter.js';
 
 dotenv.config();
-
-// User.reservedBooks is now only ever written, never read. The Loan record is the truth, and Book.reservedBy is what the frontend uses. A list that’s maintained but never read tends to rot. Removing it later means deleting it from the User model, from approveBorrow, approveReturn and deleteBook, and the matching User.updateOne / updateMany calls. I’d do it only once everything else works, since it’s cleanup and not a fix.
+const __dirname = path.resolve();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true
-}));
+if(process.env.NODE_ENV !== 'production') {
+    app.use(cors({
+        origin: "http://localhost:5173",
+        credentials: true
+    }));
+}
 
 app.use(cookieParser());
 app.use(session({secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false}));
@@ -36,9 +38,14 @@ app.use('/api/notifications', notifRoutes);
 app.use('/api/loans', loanRoutes);
 app.use('/api/login', authRoutes);
 
-app.use((_, res) => {
-    res.status(404).json({message: 'Route not found.'});
-})
+
+if(process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+    app.get("*", (req,res) => {
+        res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"))
+    })
+}
 
 
 app.use((error, _, res, next) => {
