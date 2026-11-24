@@ -1,2 +1,4 @@
 deployed at 
-https://libaxe.onrender.com/
+https://libaxe.vercel.app/
+-------------------------
+https://libaxe.onrender.com/ (outdated)
